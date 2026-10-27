@@ -14,6 +14,10 @@ namespace SmartNetwork
         private readonly Dictionary<string, Dispositivo> _dispositivosAtivos = new Dictionary<string, Dispositivo>();
 
 
+        // Pilha (Stack) que armazena o histórico de ações para Rollback
+        private readonly Stack<Dispositivo> _historicoAcoes = new Stack<Dispositivo>();
+
+
         /// Enfileira um dispositivo para verificação de segurança.
 
         public void EnfileirarDispositivo(Dispositivo dispositivo)
@@ -43,6 +47,9 @@ namespace SmartNetwork
             if (!_dispositivosAtivos.ContainsKey(dispositivo.MacAddress))
             {
                 _dispositivosAtivos.Add(dispositivo.MacAddress, dispositivo);
+
+                //registro no histórico de ações para possível rollback
+                _historicoAcoes.Push(dispositivo);
                 Console.WriteLine($"[SUCESSO] Dispositivo '{dispositivo.Nome}' (MAC: {dispositivo.MacAddress}) AUTENTICADO e movido para a Lista de Ativos.");
             }
             else
@@ -53,21 +60,32 @@ namespace SmartNetwork
 
 
 
-        /// Remove e retorna o próximo dispositivo da fila para ser verificado.
-/*
-        public Dispositivo? DesenfileirarProximo()
+        /// Desfaz a última autenticação, removendo o dispositivo dos ativos.
+
+        public void DesfazerUltimaAcao()
         {
-            if (_filaDeEspera.Count == 0)
+            // Verifica se há algo no histórico
+            if (_historicoAcoes.Count == 0)
             {
-                Console.WriteLine("[FILA] A fila de verificação está vazia.");
-                return null; // Ou você pode lançar uma exceção, se preferir.
+                Console.WriteLine("[AVISO] Não há ações recentes para desfazer.");
+                return;
             }
 
-            Dispositivo proximo = _filaDeEspera.Dequeue();
-            Console.WriteLine($"[FILA] Dispositivo {proximo.Nome} removido da fila para verificação.");
-            return proximo;
+            // Remove o último dispositivo do topo da pilha (LIFO)
+            Dispositivo dispositivoRevertido = _historicoAcoes.Pop();
+
+            // Remove ele da lista de ativos
+            if (_dispositivosAtivos.Remove(dispositivoRevertido.MacAddress))
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"\n[ROLLBACK] A autenticação do dispositivo '{dispositivoRevertido.Nome}' (MAC: {dispositivoRevertido.MacAddress}) foi DESFEITA.");
+                Console.WriteLine("Ele foi removido da lista de ativos.");
+                Console.ResetColor();
+            }
         }
-*/
+
+
+
 
         /// Apenas visualiza quem é o próximo da fila, sem removê-lo.
 

@@ -40,6 +40,7 @@ namespace SmartNetwork
                 Console.WriteLine(" 2. Processar fila (Autenticar)");
                 Console.WriteLine(" 3. Listar Dispositivos Ativos");
                 Console.WriteLine(" 4. Exibir Dashboard (LINQ)");
+                Console.WriteLine(" 5. Desfazer Última Autenticação (Rollback)");
                 Console.WriteLine(" 0. Sair");
                 Console.WriteLine("=====================================");
                 Console.Write(" Escolha uma opção: ");
@@ -115,6 +116,12 @@ namespace SmartNetwork
                     case 4:
                         Console.WriteLine("\n--- PAINEL ESTATÍSTICO(DASHBOARD) ---");
                         seguranca.ExibirDashboard();
+                        break;
+
+
+                    case 5:
+                        Console.WriteLine("\n--- ROLLBACK DE SEGURANÇA ---");
+                        seguranca.DesfazerUltimaAcao();
                         break;
 
                     case 0:
