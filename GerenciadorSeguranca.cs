@@ -60,6 +60,51 @@ namespace SmartNetwork
 
 
 
+        public void ImprimirRelatorio()
+        {
+
+
+
+
+            Console.WriteLine("\n=====================================");
+            Console.WriteLine("         RELATÓRIO GERAL DA REDE     ");
+            Console.WriteLine("=====================================");
+
+
+
+
+
+
+
+            Console.WriteLine("\n--- DISPOSITIVOS AGUARDANDO ANALISE ---");
+
+            if (_filaDeEspera.Count == 0)
+            {
+                Console.WriteLine("Nenhum dispositivo aguardando analise.");
+                
+            }
+            else
+                foreach (var item in _filaDeEspera)
+            {
+                Console.WriteLine(item.ToString());
+            }
+
+            Console.WriteLine("\n--- DISPOSITIVOS ATIVOS ---");
+            if (_dispositivosAtivos.Count == 0)
+            {
+                Console.WriteLine("Nenhum dispositivo ativo na rede.");
+            }
+            else
+            {
+                foreach (var par in _dispositivosAtivos)
+                {
+                    Console.WriteLine(par.Value.ToString());
+                }
+            }
+        }
+
+
+
         /// Desfaz a última autenticação, removendo o dispositivo dos ativos.
 
         public void DesfazerUltimaAcao()
