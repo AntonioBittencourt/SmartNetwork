@@ -130,6 +130,44 @@ namespace SmartNetwork
         }
 
 
+        public void AplicarFirewall(Func<Dispositivo, bool> regraBloqueio)
+        {
+            var dispositivosParaBloquear = _dispositivosAtivos.Values.Where(regraBloqueio).ToList();
+            if (dispositivosParaBloquear.Count == 0)
+            {
+                Console.WriteLine("[INFO] Nenhum dispositivo corresponde ao critério de bloqueio.");
+                return;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"\n[FIREWALL] ALERTA: {dispositivosParaBloquear.Count} dispositivo(s) bloqueado(s) pela regra:");
+
+
+
+
+
+
+            foreach (var dispositivo in dispositivosParaBloquear)
+            {
+                _dispositivosAtivos.Remove(dispositivo.MacAddress);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n[FIREWALL] Dispositivo '{dispositivo.Nome}' (MAC: {dispositivo.MacAddress}) BLOQUEADO e removido da rede.");
+                var historicoFiltrado = _historicoAcoes.Where(d => d.MacAddress != dispositivo.MacAddress).ToList();
+
+                _historicoAcoes.Clear();
+
+
+                for (int i = historicoFiltrado.Count - 1; i >= 0; i--)
+                {
+                    _historicoAcoes.Push(historicoFiltrado[i]);
+                }
+
+
+                Console.ResetColor();
+            }
+        }
+
+
 
 
         /// Apenas visualiza quem é o próximo da fila, sem removê-lo.

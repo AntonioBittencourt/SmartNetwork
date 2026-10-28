@@ -15,18 +15,13 @@ namespace SmartNetwork
             // Instanciando o gerenciador de segurança
             GerenciadorSeguranca seguranca = new GerenciadorSeguranca();
 
-            // Criando alguns dispositivos de teste
-            //        Dispositivo d1 = new Dispositivo("PC-RH", "AA:BB:CC:11:22:33", "192.168.0.10", "Dell", 15.5m);
-            //      Dispositivo d2 = new Dispositivo("Notebook-Diretoria", "AA:BB:CC:44:55:66", "192.168.0.11", "Apple", 45.0m);
 
-            // 1. Enfileirando os dispositivos
-            //            seguranca.EnfileirarDispositivo(d1);
-            //          seguranca.EnfileirarDispositivo(d2);
 
             Console.WriteLine($"\nDispositivos na fila: {seguranca.QuantidadeNaFila}");
 
 
             int opcao = -1;
+            int opcaoFirewall = -1;
 
             while (opcao != 0)
             {
@@ -42,6 +37,7 @@ namespace SmartNetwork
                 Console.WriteLine(" 4. Exibir Dashboard (LINQ)");
                 Console.WriteLine(" 5. Desfazer Última Autenticação (Rollback)");
                 Console.WriteLine(" 6. Imprimir Relatório");
+                Console.WriteLine(" 7. Definir regras de Firewall");
                 Console.WriteLine(" 0. Sair");
                 Console.WriteLine("=====================================");
                 Console.Write(" Escolha uma opção: ");
@@ -74,6 +70,8 @@ namespace SmartNetwork
                             decimal consumo = decimal.Parse(Console.ReadLine() ?? string.Empty);
 
                             // A própria classe Dispositivo já valida o MAC e o IP
+                            
+                            
                             Dispositivo novo = new Dispositivo(nome, mac, ip, fabricante, consumo);
                             seguranca.EnfileirarDispositivo(novo);
                         }
@@ -128,6 +126,68 @@ namespace SmartNetwork
                     case 6:
                         Console.WriteLine("\n--- IMPRIMIR RELATÓRIO ---");
                         seguranca.ImprimirRelatorio();
+                        break;
+
+                    case 7:
+                        
+                        while(opcaoFirewall != 0)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("=====================================");
+                            Console.WriteLine("      SMARTNET MANAGER - Firewall   ");
+                            Console.WriteLine("=====================================");
+                            Console.WriteLine($" Dispositivos aguardando na fila: {seguranca.QuantidadeNaFila}");
+                            Console.WriteLine("-------------------------------------");
+                            Console.WriteLine(" 1. Bloquear Dispositivo por consumo");
+                            Console.WriteLine(" 2. Bloquear Dispositivo por MAC");
+                            Console.WriteLine(" 3. Bloquear Dispositivo por trecho de IP");
+                            Console.WriteLine(" 4. Bloquear Dispositivo por fabricante");
+                            Console.WriteLine(" 0. Sair");
+                            Console.WriteLine("=====================================");
+                            Console.Write(" Escolha uma opção: ");
+                            if (!int.TryParse(Console.ReadLine(), out opcaoFirewall))
+                            {
+                                opcaoFirewall = -1; // Força continuar no loop
+                            }
+                            switch (opcaoFirewall)
+                            {
+                                case 1:
+                                    Console.WriteLine("\n--- BLOQUEAR POR CONSUMO ---");
+                                    Console.WriteLine("\nInsira o limite de consumo:");
+                                    int consumoLimite = int.Parse(Console.ReadLine());
+                                    seguranca.AplicarFirewall(d => d.ConsumoBanda > consumoLimite);
+                                    break;
+                                case 2:
+                                    Console.WriteLine("\n--- BLOQUEAR POR MAC ---");
+                                    Console.WriteLine("\nInsira o endereço MAC:");
+                                    string macAddress = Console.ReadLine();
+                                    seguranca.AplicarFirewall(d => d.MacAddress.Equals(macAddress, StringComparison.OrdinalIgnoreCase));
+                                    break;
+                                case 3:
+                                    Console.WriteLine("\n--- BLOQUEAR POR TRECHO DE IP ---");
+                                    Console.WriteLine("\nInsira o trecho de IP:");
+                                    string trechoIp = Console.ReadLine();
+                                    seguranca.AplicarFirewall(d => d.EnderecoIP.Contains(trechoIp));
+                                    break;
+                                case 4:
+                                    Console.WriteLine("\n--- BLOQUEAR POR FABRICANTE ---");
+                                    Console.WriteLine("\nInsira o fabricante:");
+                                    string fabricante = Console.ReadLine();
+                                    seguranca.AplicarFirewall(d => d.Fabricante.Equals(fabricante, StringComparison.OrdinalIgnoreCase));
+                                    break;
+                                case 0:
+                                    break;
+                                default:
+                                    Console.WriteLine("\n[ERRO] Opção inválida! Tente novamente.");
+                                    break;
+                            }
+                            if (opcaoFirewall != 0)
+                            {
+                                Console.WriteLine("\nPressione Enter para voltar ao menu do Firewall...");
+                                Console.ReadLine();
+                            }
+                        }
+
                         break;
 
                     case 0:
