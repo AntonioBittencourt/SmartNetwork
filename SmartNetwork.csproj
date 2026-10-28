@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassesAcao.cs" />
     <Compile Include="Dispositivo.cs" />
     <Compile Include="GerenciadorSeguranca.cs" />
     <Compile Include="Program.cs" />

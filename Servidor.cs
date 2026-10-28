@@ -12,15 +12,13 @@ namespace SmartNetwork
         // MAC → IP (reserva de IP fixo)
         private readonly Dictionary<string, string> _reservasPorMac = new();
 
-        /// <summary>
+
         /// Registra uma reserva de IP fixo para um MAC.
         /// Retorna false se o MAC já tem reserva ou o IP já está em uso.
-        /// </summary>
+
         public bool RegistrarReserva(string macAddress, string enderecoIP)
         {
-            // 1. null → exceção (erro de programação)
-            //ArgumentNullException.ThrowIfNull(macAddress);
-            //ArgumentNullException.ThrowIfNull(enderecoIP);
+
 
 
 
@@ -29,7 +27,7 @@ namespace SmartNetwork
             if (enderecoIP is null)
                 throw new ArgumentNullException(nameof(enderecoIP));
 
-            // 2. string vazia → ArgumentException (entrada inválida)
+            // string vazia → ArgumentException (entrada inválida)
             if (string.IsNullOrWhiteSpace(macAddress))
                 throw new ArgumentException("MAC não pode ser vazio.", nameof(macAddress));
             if (string.IsNullOrWhiteSpace(enderecoIP))
@@ -37,7 +35,7 @@ namespace SmartNetwork
 
 
 
-            // 4.Validar formato do IP via IPAddress.TryParse e Normalizar MAC (maiúsculo) — consistência com Dispositivo
+            //Validar formato do IP via IPAddress.TryParse e Normalizar MAC (maiúsculo) — consistência com Dispositivo
 
 
             if (!IPAddress.TryParse(enderecoIP, out var ipNormalizadoObj))
@@ -49,15 +47,14 @@ namespace SmartNetwork
 
             string macNormalizado = macAddress.ToUpperInvariant();
 
-            // 5. Verificar duplicidade de MAC
+            // Verificar duplicidade de MAC
             if (_reservasPorMac.ContainsKey(macNormalizado))
                 return false;
 
-            // 6. Verificar duplicidade de IP (percorre valores)
-            // 3. Validar formato do IP e normalizar
 
 
-            // 6. Verificar duplicidade de IP — 1 loop só, parse 1 vez fora
+
+            // Verificar duplicidade de IP — 1 loop só, parse 1 vez fora
 
             foreach (var ipExistente in _reservasPorMac.Values)
             {
@@ -67,43 +64,17 @@ namespace SmartNetwork
             }
 
 
-            /*  foreach (var ipExistente in _reservasPorMac.Values) &&
-            ipObj.Equals(ipNormalizadoObj))
-            {
-                if (IPAddress.Parse(ipExistente).Equals(ipNormalizadoObj))
-                    return false;
-            }*/
 
 
-            /*
-
-            foreach (var ipExistente in _reservasPorMac.Values)
-            {
-                //f (string.Equals(ipExistente, enderecoIP, StringComparison.Ordinal))
-                  //return false;
-
-                IPAddress ipNormalizado = IPAddress.Parse(enderecoIP);
-                foreach (var ipExistente in _reservasPorMac.Values)
-                {
-                    if (IPAddress.Parse(ipExistente).Equals(ipNormalizado))
-                        return false;
-                }
-
-                
-
-            }
-
-            */
-
-            // 7. Inserir
+            // Inserir
             _reservasPorMac.Add(macNormalizado, ipNormalizado);
             return true;
         }
 
-        /// <summary>
+
         /// Busca o IP reservado para um MAC.
         /// Retorna null se não houver reserva.
-        /// </summary>
+
         public string? ObterIPPorMac(string macAddress)
         {
             // ArgumentNullException.ThrowIfNull(macAddress);
@@ -119,9 +90,9 @@ namespace SmartNetwork
                 : null;
         }
 
-        /// <summary>
+
         /// Remove a reserva de um MAC.
-        /// </summary>
+
         public bool RemoverReserva(string macAddress)
         {
             //  ArgumentNullException.ThrowIfNull(macAddress);
@@ -134,17 +105,17 @@ namespace SmartNetwork
             return _reservasPorMac.Remove(macAddress.ToUpperInvariant());
         }
 
-        /// <summary>
+
         /// Lista todas as reservas (MAC → IP).
-        /// </summary>
+
         public IReadOnlyDictionary<string, string> ListarReservas()
         {
             return _reservasPorMac;
         }
 
-        /// <summary>
+
         /// Quantidade de reservas ativas.
-        /// </summary>
+
         public int TotalReservas => _reservasPorMac.Count;
     }
 }

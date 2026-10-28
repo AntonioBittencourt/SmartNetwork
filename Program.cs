@@ -35,7 +35,7 @@ namespace SmartNetwork
                 Console.WriteLine(" 2. Processar fila (Autenticar)");
                 Console.WriteLine(" 3. Listar Dispositivos Ativos");
                 Console.WriteLine(" 4. Exibir Dashboard (LINQ)");
-                Console.WriteLine(" 5. Desfazer Última Autenticação (Rollback)");
+                Console.WriteLine(" 5. Desfazer Última Autenticação ou Regra(Rollback)");
                 Console.WriteLine(" 6. Imprimir Relatório");
                 Console.WriteLine(" 7. Definir regras de Firewall");
                 Console.WriteLine(" 0. Sair");
@@ -209,24 +209,7 @@ namespace SmartNetwork
 
 
 
-            /*
-            // 2. Verificando o próximo (sem remover)
-            Dispositivo? proximo = seguranca.EspiarProximo();
-            Console.WriteLine($"O próximo a ser verificado é: {proximo?.Nome}");
 
-            // 3. Processando a fila (removendo um por um)
-            Console.WriteLine("\nIniciando verificações...");
-            while (seguranca.QuantidadeNaFila > 0)
-            {
-                //no retorno null, cria um dispositivo "vazio" para evitar exceção
-                Dispositivo emVerificacao = seguranca.DesenfileirarProximo()  ?? new Dispositivo("Vazio", "00:00:00:00:00:00", "0.0.0.0", "Nenhum", 0m);
-
-                // Aqui você faria a lógica de segurança (ex: bloquear MAC desconhecido, etc.)
-                Console.WriteLine($"-> Analisando {emVerificacao.Nome}... Aprovado!");
-            }
-
-            Console.WriteLine($"\nDispositivos na fila agora: {seguranca.QuantidadeNaFila}");
-            Console.ReadLine(); */
         }
     }
 }

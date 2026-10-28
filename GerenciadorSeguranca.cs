@@ -10,12 +10,15 @@ namespace SmartNetwork
         private readonly Queue<Dispositivo> _filaDeEspera = new Queue<Dispositivo>();
 
 
-        // Lista de Ativos (Já autenticados e na rede)
-        private readonly Dictionary<string, Dispositivo> _dispositivosAtivos = new Dictionary<string, Dispositivo>();
+         //Lista de Ativos (Já autenticados e na rede)
+   private readonly Dictionary<string, Dispositivo> _dispositivosAtivos = new Dictionary<string, Dispositivo>();
 
 
         // Pilha (Stack) que armazena o histórico de ações para Rollback
-        private readonly Stack<Dispositivo> _historicoAcoes = new Stack<Dispositivo>();
+
+
+
+        private readonly Stack<IAcao> _historicoAcoes = new Stack<IAcao>();
 
 
         /// Enfileira um dispositivo para verificação de segurança.
@@ -49,7 +52,14 @@ namespace SmartNetwork
                 _dispositivosAtivos.Add(dispositivo.MacAddress, dispositivo);
 
                 //registro no histórico de ações para possível rollback
-                _historicoAcoes.Push(dispositivo);
+
+   
+
+                // Cria a ação e guarda na pilha
+                var acao = new AcaoAutenticar(dispositivo, _dispositivosAtivos);
+                _historicoAcoes.Push(acao);
+
+
                 Console.WriteLine($"[SUCESSO] Dispositivo '{dispositivo.Nome}' (MAC: {dispositivo.MacAddress}) AUTENTICADO e movido para a Lista de Ativos.");
             }
             else
@@ -57,6 +67,7 @@ namespace SmartNetwork
                 Console.WriteLine($"[ERRO] Dispositivo com MAC {dispositivo.MacAddress} já está na Lista de Ativos.");
             }
         }
+        
 
 
 
@@ -116,17 +127,27 @@ namespace SmartNetwork
                 return;
             }
 
-            // Remove o último dispositivo do topo da pilha (LIFO)
-            Dispositivo dispositivoRevertido = _historicoAcoes.Pop();
+            // Pop! Tira o registro do topo
+            IAcao ultimaAcao = _historicoAcoes.Pop();
 
-            // Remove ele da lista de ativos
-            if (_dispositivosAtivos.Remove(dispositivoRevertido.MacAddress))
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"\n[ROLLBACK] A autenticação do dispositivo '{dispositivoRevertido.Nome}' (MAC: {dispositivoRevertido.MacAddress}) foi DESFEITA.");
-                Console.WriteLine("Ele foi removido da lista de ativos.");
-                Console.ResetColor();
-            }
+            
+
+
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"\n[ROLLBACK] Desfazendo: {ultimaAcao.Descricao}");
+
+
+
+
+
+
+
+
+            // Executa a lógica de reversão da ação (Autenticar ou Firewall)
+            ultimaAcao.Desfazer();
+
+            Console.ResetColor();
         }
 
 
@@ -139,8 +160,7 @@ namespace SmartNetwork
                 return;
             }
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"\n[FIREWALL] ALERTA: {dispositivosParaBloquear.Count} dispositivo(s) bloqueado(s) pela regra:");
+
 
 
 
@@ -150,21 +170,24 @@ namespace SmartNetwork
             foreach (var dispositivo in dispositivosParaBloquear)
             {
                 _dispositivosAtivos.Remove(dispositivo.MacAddress);
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n[FIREWALL] Dispositivo '{dispositivo.Nome}' (MAC: {dispositivo.MacAddress}) BLOQUEADO e removido da rede.");
-                var historicoFiltrado = _historicoAcoes.Where(d => d.MacAddress != dispositivo.MacAddress).ToList();
 
-                _historicoAcoes.Clear();
-
-
-                for (int i = historicoFiltrado.Count - 1; i >= 0; i--)
-                {
-                    _historicoAcoes.Push(historicoFiltrado[i]);
-                }
-
-
-                Console.ResetColor();
             }
+
+
+
+
+            // 2. Cria a ação e guarda na pilha (para poder desfazer depois)
+            var acaoFirewall = new AcaoFirewall(dispositivosParaBloquear, _dispositivosAtivos);
+            _historicoAcoes.Push(acaoFirewall);
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"\n[FIREWALL] ALERTA: {dispositivosParaBloquear.Count} dispositivo(s) bloqueado(s).");
+            foreach (var disp in dispositivosParaBloquear)
+            {
+                Console.WriteLine($"  - {disp.Nome} (MAC: {disp.MacAddress})");
+            }
+            Console.ResetColor();
+
         }
 
 
@@ -195,18 +218,17 @@ namespace SmartNetwork
 
 
 
-        /// <summary>
         /// Retorna uma lista (List) dos dispositivos que estão online (ativos).
-        /// </summary>
+
         public List<Dispositivo> ObterDispositivosOnline()
         {
             // Converte os valores do Dictionary em uma List
             return new List<Dispositivo>(_dispositivosAtivos.Values);
         }
 
-        /// <summary>
+
         /// Gera o painel estatístico usando LINQ.
-        /// </summary>
+
         public void ExibirDashboard()
         {
             List<Dispositivo> online = ObterDispositivosOnline();
